@@ -1,0 +1,1 @@
+import { BookForm } from '@/components/book-form'; export default function AddBook(){return <main className="container py-16"><p className="text-sm font-bold uppercase tracking-widest text-clay">Share a favorite</p><h1 className="serif mt-2 text-5xl font-bold text-forest">Add a book</h1><BookForm/></main>}

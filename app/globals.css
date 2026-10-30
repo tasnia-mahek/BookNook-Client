@@ -16,8 +16,10 @@ a { text-decoration:none; color:inherit; }
 .input:focus { border-color:#2f6b52; box-shadow:0 0 0 3px #2f6b5220; }
 @keyframes spin { to { transform:rotate(360deg) } }
 .spinner { width:1.4rem; height:1.4rem; border:3px solid #d4dfd5; border-top-color:#2f6b52; border-radius:50%; animation:spin .8s linear infinite; }
+.book-loader { display:grid; place-items:center; width:3.5rem; height:3.5rem; border-radius:.75rem; background:#e4eadf; animation:book-breathe 1.2s ease-in-out infinite; }
 main { animation:page-enter .35s ease both; }
 @keyframes page-enter { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+@keyframes book-breathe { 0%, 100% { transform:rotate(-5deg) scale(1); } 50% { transform:rotate(5deg) scale(1.08); } }
 .dark .bg-white { background-color:var(--surface) !important; }
 .dark .bg-ivory { background-color:var(--ivory) !important; }
 .dark .text-ink, .dark .text-ink\/60, .dark .text-ink\/70, .dark .text-ink\/75 { color:var(--ink) !important; }

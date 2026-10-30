@@ -3,19 +3,20 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Book, Borrow } from '@/lib/api';
-import { demoBorrow, demoUser, seedBooks } from '@/lib/mock-data';
+import { seedBooks } from '@/lib/mock-data';
+import { authClient } from '@/lib/auth-client';
 import { ToastProvider } from './toast';
 
 export type User = { name: string; email: string; photoUrl?: string };
-type StoredUser = User & { password: string };
 type Context = {
   user: User | null;
-  token: string | null;
+  authLoading: boolean;
   books: Book[];
   borrows: Borrow[];
-  login: (email: string, password: string, next?: string) => void;
-  register: (details: StoredUser) => void;
-  logout: () => void;
+  login: (email: string, password: string, next?: string) => Promise<void>;
+  register: (details: { name: string; email: string; photoUrl: string; password: string }) => Promise<void>;
+  loginWithGoogle: (next?: string) => Promise<void>;
+  logout: () => Promise<void>;
   addBook: (book: Omit<Book, '_id' | 'addedAt' | 'addedBy' | 'availableCopies'>) => void;
   updateBook: (id: string, changes: Partial<Book>) => void;
   deleteBook: (id: string) => void;
@@ -33,33 +34,40 @@ function read<T>(key: string, fallback: T): T {
   try { const value = localStorage.getItem(key); return value ? JSON.parse(value) as T : fallback; } catch { return fallback; }
 }
 function persist(key: string, value: unknown) { localStorage.setItem(key, JSON.stringify(value)); }
+function getUser(sessionUser: { name: string; email: string; image?: string | null }): User {
+  return { name: sessionUser.name, email: sessionUser.email, photoUrl: sessionUser.image ?? undefined };
+}
+function authError(error: { message?: string } | null | undefined) {
+  return new Error(error?.message || 'Authentication request failed.');
+}
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const session = authClient.useSession();
   const [books, setBooks] = useState<Book[]>(seedBooks);
   const [borrows, setBorrows] = useState<Borrow[]>([]);
-  const [users, setUsers] = useState<StoredUser[]>([{ ...demoUser, password: 'Reader2026' }]);
 
   useEffect(() => {
-    const session = read<{ user: User } | null>('booknook-mock-session', null);
-    setUser(session?.user ?? null);
-    setToken(session ? 'mock-token' : null);
     setBooks(read('booknook-mock-books', seedBooks));
     setBorrows(read('booknook-mock-borrows', []));
-    setUsers(read('booknook-mock-users', [{ ...demoUser, password: 'Reader2026' }]));
   }, []);
+  const user = session.data?.user ? getUser(session.data.user) : null;
   const saveBooks = (next: Book[]) => { setBooks(next); persist('booknook-mock-books', next); };
   const saveBorrows = (next: Borrow[]) => { setBorrows(next); persist('booknook-mock-borrows', next); };
-  function login(email: string, password: string, next = '/') {
-    const account = users.find(item => item.email.toLowerCase() === email.toLowerCase() && item.password === password);
-    if (!account) throw new Error('Use a registered account or the demo credentials shown below.');
-    const nextUser = { name: account.name, email: account.email, photoUrl: account.photoUrl };
-    setUser(nextUser); setToken('mock-token'); persist('booknook-mock-session', { user: nextUser }); router.push(next);
+  async function login(email: string, password: string, next = '/') {
+    const result = await authClient.signIn.email({ email, password, callbackURL: next });
+    if (result.error) throw authError(result.error);
+    router.push(next);
   }
-  function register(details: StoredUser) { const nextUsers = [...users, details]; setUsers(nextUsers); persist('booknook-mock-users', nextUsers); }
-  function logout() { localStorage.removeItem('booknook-mock-session'); setUser(null); setToken(null); router.push('/'); }
+  async function register(details: { name: string; email: string; photoUrl: string; password: string }) {
+    const result = await authClient.signUp.email({ name: details.name, email: details.email, password: details.password, image: details.photoUrl || undefined });
+    if (result.error) throw authError(result.error);
+  }
+  async function loginWithGoogle(next = '/') {
+    const result = await authClient.signIn.social({ provider: 'google', callbackURL: next });
+    if (result.error) throw authError(result.error);
+  }
+  async function logout() { const result = await authClient.signOut(); if (result.error) throw authError(result.error); router.push('/'); }
   function addBook(input: Omit<Book, '_id' | 'addedAt' | 'addedBy' | 'availableCopies'>) {
     if (!user) throw new Error('Please log in first.');
     const book: Book = { ...input, _id: `book-${Date.now()}`, addedAt: new Date().toISOString(), addedBy: user, availableCopies: input.totalCopies };
@@ -82,6 +90,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     saveBooks(books.map(item => item._id === borrow.bookId ? { ...item, availableCopies: Math.min(item.totalCopies, item.availableCopies + 1) } : item));
     saveBorrows(borrows.filter(item => item._id !== id));
   }
-  const value = useMemo(() => ({ user, token, books, borrows, login, register, logout, addBook, updateBook, deleteBook, borrowBook, returnBook }), [user, token, books, borrows, users]);
+  const value = useMemo(() => ({ user, authLoading: session.isPending, books, borrows, login, register, loginWithGoogle, logout, addBook, updateBook, deleteBook, borrowBook, returnBook }), [user, session.isPending, books, borrows]);
   return <AppContext.Provider value={value}><ToastProvider>{children}</ToastProvider></AppContext.Provider>;
 }

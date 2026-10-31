@@ -37,5 +37,4 @@ Do not commit `.env.local`. Google requires `GOOGLE_CLIENT_ID` and
 
 ## Deployment
 
-No live deployment has been completed yet. Add the deployed client URL here
-after deployment.
+https://book-nook-client.vercel.app/ 

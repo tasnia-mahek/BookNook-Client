@@ -9,7 +9,7 @@ import { ToastProvider } from './toast';
 
 export type User = { name: string; email: string; photoUrl?: string };
 type Context = {
-  user: User | null; authLoading: boolean; books: Book[]; borrows: Borrow[];
+  user: User | null; authLoading: boolean; books: Book[]; booksLoading: boolean; borrows: Borrow[]; borrowsLoading: boolean;
   login: (email: string, password: string, next?: string) => Promise<void>;
   register: (details: { name: string; email: string; photoUrl: string; password: string }) => Promise<void>;
   loginWithGoogle: (next?: string) => Promise<void>; logout: () => Promise<void>;
@@ -24,11 +24,12 @@ function authError(error: { message?: string } | null | undefined) { return new 
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter(); const session = authClient.useSession();
-  const [books, setBooks] = useState<Book[]>([]); const [borrows, setBorrows] = useState<Borrow[]>([]);
-  useEffect(() => { api<Book[]>('/books').then(setBooks).catch(error => console.error('Unable to load books:', error)); }, []);
+  const [books, setBooks] = useState<Book[]>([]); const [booksLoading, setBooksLoading] = useState(true); const [borrows, setBorrows] = useState<Borrow[]>([]); const [borrowsLoading, setBorrowsLoading] = useState(false);
+  useEffect(() => { api<Book[]>('/books').then(setBooks).catch(error => console.error('Unable to load books:', error)).finally(() => setBooksLoading(false)); }, []);
   useEffect(() => {
-    if (!session.data?.user) { setBorrows([]); return; }
-    getAuthToken().then(token => api<Borrow[]>('/borrows', {}, token)).then(setBorrows).catch(error => console.error('Unable to load borrows:', error));
+    if (!session.data?.user) { setBorrows([]); setBorrowsLoading(false); return; }
+    setBorrowsLoading(true);
+    getAuthToken().then(token => api<Borrow[]>('/borrows', {}, token)).then(setBorrows).catch(error => console.error('Unable to load borrows:', error)).finally(() => setBorrowsLoading(false));
   }, [session.data?.user?.email]);
   const user = session.data?.user ? getUser(session.data.user) : null;
   async function login(email: string, password: string, next = '/') { const result = await authClient.signIn.email({ email, password, callbackURL: next }); if (result.error) throw authError(result.error); router.push(next); }
@@ -40,6 +41,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   async function deleteBook(id: string) { await api(`/books/${id}`, { method: 'DELETE' }, await getAuthToken()); setBooks(current => current.filter(item => item._id !== id)); }
   async function borrowBook(id: string) { if (!user) throw new Error('Please log in first.'); const token = await getAuthToken(); const borrow = await api<Borrow>('/borrows', { method: 'POST', body: JSON.stringify({ bookId: id }) }, token); setBorrows(current => [borrow, ...current]); const book = await api<Book>(`/books/${id}`); setBooks(current => current.map(item => item._id === id ? book : item)); }
   async function returnBook(id: string) { const borrow = borrows.find(item => item._id === id); if (!borrow) throw new Error('Borrow not found.'); await api(`/borrows/${id}`, { method: 'DELETE' }, await getAuthToken()); setBorrows(current => current.filter(item => item._id !== id)); const book = await api<Book>(`/books/${borrow.bookId}`); setBooks(current => current.map(item => item._id === book._id ? book : item)); }
-  const value = useMemo(() => ({ user, authLoading: session.isPending, books, borrows, login, register, loginWithGoogle, logout, addBook, updateBook, deleteBook, borrowBook, returnBook }), [user, session.isPending, books, borrows]);
+  const value = useMemo(() => ({ user, authLoading: session.isPending, books, booksLoading, borrows, borrowsLoading, login, register, loginWithGoogle, logout, addBook, updateBook, deleteBook, borrowBook, returnBook }), [user, session.isPending, books, booksLoading, borrows, borrowsLoading]);
   return <AppContext.Provider value={value}><ToastProvider>{children}</ToastProvider></AppContext.Provider>;
 }

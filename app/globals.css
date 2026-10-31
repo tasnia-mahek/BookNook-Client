@@ -20,6 +20,12 @@ select, textarea, input { color-scheme:light; }
 .text-forest { color:var(--primary) !important; }
 .text-ink, .text-ink\/60, .text-ink\/70, .text-ink\/75 { color:var(--text-muted) !important; }
 .bg-forest { background:var(--band) !important; color:var(--on-band); }
+.text-white { color:var(--on-band) !important; }
+.bg-clay { background:var(--accent) !important; }
+.bg-moss { background:var(--primary) !important; }
+.border-white\/15 { border-color:color-mix(in srgb, var(--on-band) 15%, transparent) !important; }
+.text-white\/50 { color:color-mix(in srgb, var(--on-band) 50%, transparent) !important; }
+.text-white\/70 { color:color-mix(in srgb, var(--on-band) 70%, transparent) !important; }
 .bg-ivory, .bg-white { background:var(--surface) !important; color:var(--text); }
 .border-\[\#dfe5dc\], .border-\[\#e4eadf\], .ring-\[\#e2e8e0\] { border-color:var(--border) !important; }
 .bg-\[\#e4eadf\] { background:color-mix(in srgb, var(--primary) 10%, var(--bg)) !important; }
@@ -28,6 +34,8 @@ select, textarea, input { color-scheme:light; }
 .text-red-600, .text-red-700 { color:var(--danger) !important; }
 .bg-red-50 { background:color-mix(in srgb, var(--danger) 12%, var(--surface)) !important; }
 button:focus-visible, a:focus-visible { outline:3px solid var(--warm); outline-offset:3px; }
+.swiper-pagination-bullet { background:var(--on-band); opacity:.65; }
+.swiper-pagination-bullet-active { background:var(--accent); opacity:1; }
 @keyframes spin { to { transform:rotate(360deg) } }
 .spinner { width:1.4rem; height:1.4rem; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
 .book-loader { display:grid; place-items:center; width:3.5rem; height:3.5rem; border-radius:.75rem; background:var(--soft); animation:book-breathe 1.2s ease-in-out infinite; }

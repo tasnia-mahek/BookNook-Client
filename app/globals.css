@@ -31,6 +31,8 @@ select, textarea, input { color-scheme:light; }
 .bg-\[\#e4eadf\] { background:color-mix(in srgb, var(--primary) 10%, var(--bg)) !important; }
 .text-clay { color:var(--eyebrow) !important; }
 .text-moss { color:var(--primary) !important; }
+.bg-\[\#d8b27d\] { background:var(--accent) !important; color:var(--on-accent) !important; }
+.text-\[\#d8b27d\] { color:var(--accent) !important; }
 .text-red-600, .text-red-700 { color:var(--danger) !important; }
 .bg-red-50 { background:color-mix(in srgb, var(--danger) 12%, var(--surface)) !important; }
 button:focus-visible, a:focus-visible { outline:3px solid var(--warm); outline-offset:3px; }

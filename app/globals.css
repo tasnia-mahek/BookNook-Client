@@ -1,15 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root { --bg:#FBF3EE; --surface:#FFFFFF; --text:#3A1F3D; --text-muted:#6E5566; --primary:#8E3B6E; --on-primary:#FFF6F0; --accent:#F2A68B; --on-accent:#3A1F3D; --band:#3A1F3D; --on-band:#F7E9F0; --border:#E8D5CC; --eyebrow:#8E3B6E; --danger:#A33A4A; }
-:root.dark { --bg:#1E1220; --surface:#2A1A2E; --text:#F7E9F0; --text-muted:#C9B3C4; --primary:#C76BA3; --on-primary:#1E1220; --accent:#F2A68B; --on-accent:#1E1220; --band:#150C17; --on-band:#F7E9F0; --border:#3A2640; --eyebrow:#F2A68B; --danger:#FF9BAA; }
+:root { --bg:#FBF3EE; --surface:#FFFFFF; --text:#3A1F3D; --text-muted:#6E5566; --primary:#8E3B6E; --on-primary:#FFF6F0; --accent:#F2A68B; --on-accent:#3A1F3D; --band:#3A1F3D; --on-band:#F7E9F0; --border:#E8D5CC; --eyebrow:#8E3B6E; --danger:#A33A4A; --glow:rgba(212,160,60,.35); --glow-soft:rgba(212,160,60,.18); --gold:#C9972F; }
+:root.dark { --bg:#1E1220; --surface:#2A1A2E; --text:#F7E9F0; --text-muted:#C9B3C4; --primary:#C76BA3; --on-primary:#1E1220; --accent:#F2A68B; --on-accent:#1E1220; --band:#150C17; --on-band:#F7E9F0; --border:#3A2640; --eyebrow:#F2A68B; --danger:#FF9BAA; --glow:rgba(244,199,123,.45); --glow-soft:rgba(244,199,123,.2); --gold:#F4C77B; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font-body), Arial, sans-serif; transition:background-color .25s ease, color .25s ease; }
 a { text-decoration:none; color:inherit; }
 .container { width:min(1120px, calc(100% - 2rem)); margin:auto; }
 .serif { font-family:var(--font-heading), Georgia, serif; }
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:999px; padding:.75rem 1.15rem; font-weight:700; transition:transform .2s, box-shadow .2s; }
-.btn:hover { transform:translateY(-2px); box-shadow:0 10px 24px color-mix(in srgb, var(--accent) 20%, transparent); }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:999px; padding:.75rem 1.15rem; font-weight:700; transition:transform 250ms ease, box-shadow 250ms ease; }
+.btn:hover { transform:translateY(-2px); box-shadow:0 0 0 2px var(--glow-soft), 0 0 18px var(--glow); }
 .btn-primary { background:var(--primary); color:var(--on-primary); }
 .btn-secondary { background:transparent; color:var(--primary); border:1px solid var(--primary); }
 .input { width:100%; border:1px solid var(--border); border-radius:.75rem; background:var(--surface); color:var(--text); padding:.8rem 1rem; outline:none; }
@@ -33,6 +33,18 @@ select, textarea, input { color-scheme:light; }
 .text-moss { color:var(--primary) !important; }
 .bg-\[\#d8b27d\] { background:var(--accent) !important; color:var(--on-accent) !important; }
 .text-\[\#d8b27d\] { color:var(--accent) !important; }
+.glow-card { border:1px solid var(--border); transition:box-shadow 250ms ease, border-color 250ms ease, transform 250ms ease; }
+.glow-card:hover, .glow-card:focus-within { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 10px 30px var(--glow-soft), 0 0 24px var(--glow); }
+.glow-subtle:hover { box-shadow:0 0 12px var(--glow-soft); }
+.bg-ivory.p-8, .bg-white.p-6.shadow-sm { border:1px solid var(--border); transition:box-shadow 250ms ease, border-color 250ms ease, transform 250ms ease; }
+.bg-ivory.p-8:hover, .bg-white.p-6.shadow-sm:hover { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 10px 30px var(--glow-soft), 0 0 24px var(--glow); }
+button.rounded-full:hover, button.rounded-full:focus-visible { box-shadow:0 0 12px var(--glow-soft); }
+.btn:focus-visible, .glow-subtle:focus-visible { box-shadow:0 0 0 2px var(--glow-soft), 0 0 18px var(--glow); }
+@media (prefers-reduced-motion: reduce) {
+  .btn, .glow-card { transition:none; }
+  .btn:hover { transform:none; }
+  .glow-card:hover { transform:none; }
+}
 .text-red-600, .text-red-700 { color:var(--danger) !important; }
 .bg-red-50 { background:color-mix(in srgb, var(--danger) 12%, var(--surface)) !important; }
 button:focus-visible, a:focus-visible { outline:3px solid var(--warm); outline-offset:3px; }
